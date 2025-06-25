@@ -7,7 +7,7 @@ Available in three versions:
 2. **Desktop GUI** - For desktop users
 3. **Web interface** - For browser access and remote usage
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Python](https://img.shields.io/badge/python-3.6%2B-blue.svg)
 
@@ -21,7 +21,9 @@ Available in three versions:
 - List available formats for a video
 - Display video information
 - Control download rate
-- Proxy support
+- **Proxy support**:
+  - Manual proxy configuration
+  - **Random proxy selection for YouTube** (automatically selects a working proxy)
 - **Cookie bypass for restricted sites**:
   - Use cookies from browser (Chrome, Firefox, Safari, Edge, Opera)
   - Paste cookies in Netscape format
@@ -76,6 +78,7 @@ python multi_downloader.py [options] URL [URL...]
 - `-l, --list-formats`: List available formats instead of downloading
 - `-i, --info`: Display video info instead of downloading
 - `--proxy URL`: Use the specified HTTP/HTTPS/SOCKS proxy
+- `--random-proxy`: Use a random proxy for YouTube downloads
 - `--limit-rate RATE`: Maximum download rate (e.g. 50K, 4.2M)
 - `--no-mtime`: Don't use the Last-modified header to set the file modification time
 - `--cookies FILE`: Path to cookies file (Netscape or browser cookies.txt format)
@@ -123,6 +126,11 @@ python multi_downloader.py [options] URL [URL...]
    python multi_downloader.py --limit-rate 500K https://www.youtube.com/watch?v=dQw4w9WgXcQ
    ```
 
+8. Use a random proxy for YouTube downloads:
+   ```
+   python multi_downloader.py --random-proxy https://www.youtube.com/watch?v=dQw4w9WgXcQ
+   ```
+
 ## Advanced Usage
 
 You can combine multiple options for more specific downloads:
@@ -152,12 +160,17 @@ Some websites require cookies or specific headers to download videos. Here's how
    python multi_downloader.py --auth-token "your_oauth_token_here" --auth-token-type "Bearer" https://api-protected-site.com/video
    ```
 
-4. Using custom user agent and referer:
+4. Using a random proxy for YouTube (helps bypass geo-restrictions):
+   ```
+   python multi_downloader.py --random-proxy https://www.youtube.com/watch?v=geo-restricted-video
+   ```
+
+5. Using custom user agent and referer:
    ```
    python multi_downloader.py --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" --referer "https://www.example.com" https://www.example.com/restricted-video
    ```
 
-5. Using custom HTTP headers:
+6. Using custom HTTP headers:
    ```
    python multi_downloader.py --headers '{"X-Requested-With": "XMLHttpRequest", "Origin": "https://www.example.com"}' https://www.example.com/restricted-video
    ```
@@ -212,6 +225,12 @@ To deploy to Render.com:
    - Use the following settings:
      - Name: multi-format-downloader
      - Environment: Python 3
+
+For detailed instructions, see [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md).
+
+#### Updating Your Render Deployment
+
+If you've already deployed the application and want to update to the latest version (1.1.0) with OAuth token support, see [UPDATE_RENDER.md](UPDATE_RENDER.md) for alternative update methods.
      - Build Command: `pip install -r requirements.txt`
      - Start Command: `gunicorn web_downloader:app`
      - Add the following environment variables:

@@ -108,6 +108,25 @@
                                 </div>
                                 
                                 <div class="mb-3">
+                                    <h6 class="mb-3">Proxy Settings</h6>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <label for="{{ form.proxy.id }}" class="form-label">Proxy URL</label>
+                                            {{ form.proxy(class="form-control", placeholder="http://proxy.example.com:8080") }}
+                                            <div class="form-text">HTTP/HTTPS/SOCKS proxy (e.g., http://proxy.example.com:8080)</div>
+                                        </div>
+                                        <div class="col-md-4 d-flex align-items-end">
+                                            <div class="form-check mb-3">
+                                                {{ form.use_random_proxy(class="form-check-input") }}
+                                                <label class="form-check-label" for="{{ form.use_random_proxy.id }}">
+                                                    Use Random Proxy for YouTube
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
                                     <h6 class="mb-3">OAuth Authentication</h6>
                                     <div class="row">
                                         <div class="col-md-8">

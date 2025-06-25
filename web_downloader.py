@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import threading
 import time
+import logging
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, session, g
@@ -21,6 +22,14 @@ from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from wtforms import StringField, SelectField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, URL, Optional
+
+# Import proxy management module
+try:
+    from proxies import get_random_proxy, is_youtube_url
+    PROXY_SUPPORT = True
+except ImportError:
+    PROXY_SUPPORT = False
+    logging.warning("Proxy module not found. Random proxy feature will be disabled.")
 
 # Create Flask app
 app = Flask(__name__)
@@ -89,6 +98,8 @@ class DownloadForm(FlaskForm):
     user_agent = StringField('User Agent', validators=[Optional()])
     referer = StringField('Referer URL', validators=[Optional()])
     custom_headers = TextAreaField('Custom Headers (JSON format)', validators=[Optional()])
+    proxy = StringField('Proxy URL (HTTP/HTTPS/SOCKS)', validators=[Optional()])
+    use_random_proxy = BooleanField('Use Random Proxy for YouTube')
     
     # OAuth options
     auth_token = StringField('OAuth Token', validators=[Optional()])
@@ -160,6 +171,22 @@ def build_command(form_data, download_id):
     referer = form_data.get('referer', '').strip()
     if referer:
         cmd.extend(['--referer', referer])
+    
+    # Handle proxy
+    proxy = form_data.get('proxy', '').strip()
+    use_random_proxy = form_data.get('use_random_proxy', False)
+    
+    if proxy:
+        cmd.extend(['--proxy', proxy])
+    elif use_random_proxy and PROXY_SUPPORT:
+        # Check if URL is from YouTube
+        url = form_data.get('url', '')
+        if is_youtube_url(url):
+            # Get a random proxy for YouTube URL
+            random_proxy = get_random_proxy(url)
+            if random_proxy:
+                print(f"Using random proxy: {random_proxy}")
+                cmd.extend(['--proxy', random_proxy])
     
     # Handle custom headers and OAuth token
     custom_headers = form_data.get('custom_headers', '').strip()

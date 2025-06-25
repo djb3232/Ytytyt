@@ -435,11 +435,20 @@ cleanup_thread.daemon = True
 cleanup_thread.start()
 
 if __name__ == '__main__':
-    # Get port from environment or use default
-    port = int(os.environ.get('PORT', 12000))
+    import argparse
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Web Multi-Format Video and Audio Downloader')
+    parser.add_argument('--port', type=int, default=int(os.environ.get('PORT', 12000)),
+                        help='Port to run the server on')
+    parser.add_argument('--host', type=str, default='0.0.0.0',
+                        help='Host to run the server on')
+    parser.add_argument('--debug', action='store_true',
+                        help='Run in debug mode')
+    args = parser.parse_args()
     
     # Determine if we're running in production or development
     is_production = os.environ.get('RENDER', False) or os.environ.get('PRODUCTION', False)
     
     # Run app
-    app.run(host='0.0.0.0', port=port, debug=not is_production)
+    app.run(host=args.host, port=args.port, debug=args.debug or not is_production)

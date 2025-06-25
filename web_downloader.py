@@ -90,6 +90,15 @@ class DownloadForm(FlaskForm):
     referer = StringField('Referer URL', validators=[Optional()])
     custom_headers = TextAreaField('Custom Headers (JSON format)', validators=[Optional()])
     
+    # OAuth options
+    auth_token = StringField('OAuth Token', validators=[Optional()])
+    auth_token_type = SelectField('OAuth Token Type', choices=[
+        ('Bearer', 'Bearer'),
+        ('Basic', 'Basic'),
+        ('Digest', 'Digest'),
+        ('OAuth', 'OAuth')
+    ], default='Bearer')
+    
     submit = SubmitField('Download')
 
 # Function to build yt-dlp command
@@ -152,9 +161,32 @@ def build_command(form_data, download_id):
     if referer:
         cmd.extend(['--referer', referer])
     
-    # Handle custom headers
+    # Handle custom headers and OAuth token
     custom_headers = form_data.get('custom_headers', '').strip()
-    if custom_headers:
+    auth_token = form_data.get('auth_token', '').strip()
+    auth_token_type = form_data.get('auth_token_type', 'Bearer')
+    
+    if auth_token:
+        # Create Authorization header with the token
+        auth_header = f'Authorization: {auth_token_type} {auth_token}'
+        
+        if custom_headers:
+            try:
+                # Parse existing headers
+                headers_dict = json.loads(custom_headers)
+                # Add Authorization header
+                headers_dict['Authorization'] = f'{auth_token_type} {auth_token}'
+                # Convert back to JSON
+                cmd.extend(['--add-headers', json.dumps(headers_dict)])
+            except json.JSONDecodeError:
+                # If not valid JSON, create a new headers dict
+                headers_dict = {'Authorization': f'{auth_token_type} {auth_token}'}
+                cmd.extend(['--add-headers', json.dumps(headers_dict)])
+        else:
+            # No existing headers, just add the Authorization header
+            headers_dict = {'Authorization': f'{auth_token_type} {auth_token}'}
+            cmd.extend(['--add-headers', json.dumps(headers_dict)])
+    elif custom_headers:
         try:
             # Validate JSON format
             json.loads(custom_headers)
@@ -270,7 +302,14 @@ def download():
             'quality': form.quality.data,
             'audio_only': form.audio_only.data,
             'playlist': form.playlist.data,
-            'subtitles': form.subtitles.data
+            'subtitles': form.subtitles.data,
+            'cookies': form.cookies.data,
+            'browser_cookies': form.browser_cookies.data,
+            'user_agent': form.user_agent.data,
+            'referer': form.referer.data,
+            'custom_headers': form.custom_headers.data,
+            'auth_token': form.auth_token.data,
+            'auth_token_type': form.auth_token_type.data
         }
         
         cmd, output_dir = build_command(form_data, download_id)

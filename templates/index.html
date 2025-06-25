@@ -106,6 +106,21 @@
                                     {{ form.custom_headers(class="form-control", rows="3", placeholder='{"X-Requested-With": "XMLHttpRequest"}') }}
                                     <div class="form-text">Add custom HTTP headers in JSON format</div>
                                 </div>
+                                
+                                <div class="mb-3">
+                                    <h6 class="mb-3">OAuth Authentication</h6>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <label for="{{ form.auth_token.id }}" class="form-label">OAuth Token</label>
+                                            {{ form.auth_token(class="form-control", placeholder="your-oauth-token-here") }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="{{ form.auth_token_type.id }}" class="form-label">Token Type</label>
+                                            {{ form.auth_token_type(class="form-select") }}
+                                        </div>
+                                    </div>
+                                    <div class="form-text">For sites that require OAuth authentication</div>
+                                </div>
                             </div>
                         </div>
                     </div>

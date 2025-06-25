@@ -167,6 +167,30 @@ class DownloaderGUI:
         self.custom_headers_entry.grid(row=0, column=1, padx=5, sticky=tk.EW)
         custom_headers_frame.columnconfigure(1, weight=1)
         
+        # OAuth Authentication
+        oauth_frame = ttk.LabelFrame(advanced_frame, text="OAuth Authentication")
+        oauth_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # OAuth token
+        token_frame = ttk.Frame(oauth_frame)
+        token_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(token_frame, text="OAuth Token:").grid(row=0, column=0, sticky=tk.W)
+        self.auth_token_var = tk.StringVar()
+        self.auth_token_entry = ttk.Entry(token_frame, textvariable=self.auth_token_var)
+        self.auth_token_entry.grid(row=0, column=1, padx=5, sticky=tk.EW)
+        token_frame.columnconfigure(1, weight=1)
+        
+        # Token type
+        token_type_frame = ttk.Frame(oauth_frame)
+        token_type_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(token_type_frame, text="Token Type:").grid(row=0, column=0, sticky=tk.W)
+        self.auth_token_type_var = tk.StringVar(value="Bearer")
+        token_type_options = ["Bearer", "Basic", "Digest", "OAuth"]
+        self.auth_token_type_combo = ttk.Combobox(token_type_frame, textvariable=self.auth_token_type_var, values=token_type_options, width=10)
+        self.auth_token_type_combo.grid(row=0, column=1, padx=5, sticky=tk.W)
+        
         # Additional options
         options_frame2 = ttk.Frame(advanced_frame)
         options_frame2.pack(fill=tk.X, padx=10, pady=5)
@@ -327,12 +351,37 @@ class DownloaderGUI:
         if referer:
             cmd.extend(['--referer', referer])
         
-        # Handle custom headers
+        # Handle custom headers and OAuth token
         custom_headers = self.custom_headers_var.get().strip()
-        if custom_headers:
+        auth_token = self.auth_token_var.get().strip()
+        auth_token_type = self.auth_token_type_var.get()
+        
+        import json
+        
+        if auth_token:
+            # Create Authorization header with the token
+            auth_header = f'Authorization: {auth_token_type} {auth_token}'
+            
+            if custom_headers:
+                try:
+                    # Parse existing headers
+                    headers_dict = json.loads(custom_headers)
+                    # Add Authorization header
+                    headers_dict['Authorization'] = f'{auth_token_type} {auth_token}'
+                    # Convert back to JSON
+                    cmd.extend(['--add-headers', json.dumps(headers_dict)])
+                except (json.JSONDecodeError, ImportError):
+                    # If not valid JSON, create a new headers dict
+                    self.update_console("Warning: Invalid JSON format for custom headers. Creating new headers with OAuth token.")
+                    headers_dict = {'Authorization': f'{auth_token_type} {auth_token}'}
+                    cmd.extend(['--add-headers', json.dumps(headers_dict)])
+            else:
+                # No existing headers, just add the Authorization header
+                headers_dict = {'Authorization': f'{auth_token_type} {auth_token}'}
+                cmd.extend(['--add-headers', json.dumps(headers_dict)])
+        elif custom_headers:
             try:
                 # Validate JSON format
-                import json
                 json.loads(custom_headers)
                 cmd.extend(['--add-headers', custom_headers])
             except (json.JSONDecodeError, ImportError):

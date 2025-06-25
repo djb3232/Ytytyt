@@ -26,6 +26,10 @@ Available in three versions:
   - Use cookies from browser (Chrome, Firefox, Safari, Edge, Opera)
   - Paste cookies in Netscape format
   - Extract cookies from browsers using the included utility
+- **OAuth token authentication**:
+  - Support for Bearer, Basic, Digest, and OAuth token types
+  - Automatically adds Authorization header
+  - Works with sites requiring OAuth authentication
 - **Advanced HTTP options**:
   - Custom User-Agent
   - Custom Referer
@@ -79,6 +83,8 @@ python multi_downloader.py [options] URL [URL...]
 - `--user-agent AGENT`: Specify a custom user agent
 - `--referer URL`: Specify a custom referer, useful for bypassing some restrictions
 - `--headers JSON`: Specify custom HTTP headers as a JSON string
+- `--auth-token TOKEN`: OAuth token for sites requiring authentication
+- `--auth-token-type TYPE`: OAuth token type (Bearer, Basic, Digest, OAuth), default is Bearer
 
 ## Examples
 
@@ -141,12 +147,17 @@ Some websites require cookies or specific headers to download videos. Here's how
    python multi_downloader.py --cookies cookies.txt https://www.example.com/restricted-video
    ```
 
-3. Using custom user agent and referer:
+3. Using OAuth token authentication:
+   ```
+   python multi_downloader.py --auth-token "your_oauth_token_here" --auth-token-type "Bearer" https://api-protected-site.com/video
+   ```
+
+4. Using custom user agent and referer:
    ```
    python multi_downloader.py --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" --referer "https://www.example.com" https://www.example.com/restricted-video
    ```
 
-4. Using custom HTTP headers:
+5. Using custom HTTP headers:
    ```
    python multi_downloader.py --headers '{"X-Requested-With": "XMLHttpRequest", "Origin": "https://www.example.com"}' https://www.example.com/restricted-video
    ```

@@ -187,22 +187,26 @@ This will start the web server on port 8080. You can access it at http://localho
 
 ### Render.com Deployment
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/djb3232/Ytytyt)
+
 To deploy to Render.com:
 
-1. Fork this repository to your GitHub account
-2. Sign up for a Render.com account
-3. Connect your GitHub account to Render.com
-4. Create a new Web Service in Render.com
-5. Select your forked repository
-6. Use the following settings:
-   - Name: multi-format-downloader
-   - Environment: Python 3
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `gunicorn web_downloader:app`
-   - Add the following environment variables:
-     - `PORT`: 10000
-     - `SECRET_KEY`: (generate a random string)
-     - `RENDER`: true
+1. Click the "Deploy to Render" button above, or
+2. Follow these steps manually:
+   - Fork this repository to your GitHub account
+   - Sign up for a Render.com account
+   - Connect your GitHub account to Render.com
+   - Create a new Web Service in Render.com
+   - Select your forked repository
+   - Use the following settings:
+     - Name: multi-format-downloader
+     - Environment: Python 3
+     - Build Command: `pip install -r requirements.txt`
+     - Start Command: `gunicorn web_downloader:app`
+     - Add the following environment variables:
+       - `PORT`: 10000
+       - `SECRET_KEY`: (generate a random string)
+       - `RENDER`: true
 
 For detailed instructions, see [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md).
 

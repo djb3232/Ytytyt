@@ -1,8 +1,11 @@
 # Multi-Format Video and Audio Downloader
 
-A powerful script to download videos and audio from various platforms in different formats. This tool uses [yt-dlp](https://github.com/yt-dlp/yt-dlp), a feature-rich fork of youtube-dl.
+A powerful tool to download videos and audio from various platforms in different formats. This tool uses [yt-dlp](https://github.com/yt-dlp/yt-dlp), a feature-rich fork of youtube-dl.
 
-Available in both command-line and graphical user interface versions.
+Available in three versions:
+1. **Command-line interface** - For terminal users
+2. **Desktop GUI** - For desktop users
+3. **Web interface** - For browser access and remote usage
 
 ## Features
 
@@ -140,6 +143,48 @@ The GUI provides all the same functionality as the command-line version but in a
 - List available formats and video information
 
 ![GUI Screenshot](https://i.imgur.com/example.png)
+
+## Web Interface
+
+This project also includes a web interface that allows you to download videos and audio through your browser:
+
+```
+./run_web_server.sh
+```
+
+Or for production environments:
+
+```
+./run_production.sh
+```
+
+The web interface provides the following features:
+
+- Access the downloader from any device with a web browser
+- Download videos and audio with customizable options
+- Track download progress in real-time
+- Manage multiple downloads simultaneously
+- Download completed files directly from the browser
+- Responsive design that works on desktop and mobile devices
+
+### Web Interface Screenshots
+
+![Web Interface Screenshot](https://i.imgur.com/example2.png)
+
+### Running on a Server
+
+You can run the web interface on a server to access it remotely:
+
+1. Clone the repository on your server
+2. Install dependencies: `pip install -r requirements.txt`
+3. Run the production server: `./run_production.sh`
+4. Access the interface at `http://your-server-ip:12000`
+
+You can change the port by setting the `PORT` environment variable:
+
+```
+PORT=8080 ./run_production.sh
+```
 
 ## License
 

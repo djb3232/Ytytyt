@@ -124,6 +124,17 @@ To update your application:
 3. If auto-deploy is disabled, manually deploy from the Render dashboard
 4. If using the CLI, run `./deploy_to_render.sh` again
 
+### New in Version 1.1.0
+
+The latest version includes OAuth token authentication support:
+
+- Added OAuth token fields to the web interface
+- Support for Bearer, Basic, Digest, and OAuth token types
+- Automatically adds Authorization header to requests
+- Works with sites requiring OAuth authentication
+
+This feature is particularly useful for accessing content on sites that use OAuth for authentication instead of cookies.
+
 ## Conclusion
 
 Your Multi-Format Video and Audio Downloader is now deployed on Render.com and accessible to users worldwide. Remember to monitor your application's performance and usage to ensure it meets your needs.

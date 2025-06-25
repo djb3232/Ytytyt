@@ -2,6 +2,7 @@
 # Script to deploy the Multi-Format Video and Audio Downloader to Render.com
 
 echo "===== Multi-Format Video and Audio Downloader Deployment ====="
+echo "Version 1.1.0 - Now with OAuth token authentication support"
 echo "This script will help you deploy the application to Render.com"
 echo ""
 
@@ -60,3 +61,9 @@ echo "Note: It may take a few minutes for the deployment to complete."
 echo ""
 echo "After deployment, you can access your application at the URL shown in the Render dashboard."
 echo "===== Deployment Complete ====="
+echo ""
+echo "New in Version 1.1.0:"
+echo "- OAuth token authentication support added"
+echo "- Support for Bearer, Basic, Digest, and OAuth token types"
+echo "- Automatically adds Authorization header to requests"
+echo "- Works with sites requiring OAuth authentication"

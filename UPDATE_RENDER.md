@@ -2,7 +2,15 @@
 
 This guide provides alternative methods for updating your Multi-Format Video and Audio Downloader deployment on Render.com.
 
-## What's New in Version 1.1.0
+## What's New in Version 1.2.0
+
+- **Proxy support enhancements**:
+  - Added random proxy selection for YouTube downloads
+  - Automatically selects working proxies from a public list
+  - Helps bypass geo-restrictions on YouTube videos
+  - Available in all interfaces (CLI, GUI, web)
+
+## Previous Updates (Version 1.1.0)
 
 - **OAuth token authentication support** added to all interfaces (CLI, GUI, web)
 - Support for Bearer, Basic, Digest, and OAuth token types
@@ -53,11 +61,19 @@ If you want to use the Render CLI:
 
 ## Verifying the Update
 
-After updating, verify that the OAuth token functionality is working:
+After updating, verify that the new proxy functionality is working:
 
 1. Access your application at your Render URL (e.g., https://multi-format-downloader.onrender.com)
-2. Check that the OAuth token fields are visible in the web interface
-3. Test downloading content that requires OAuth authentication
+2. Check that the proxy fields are visible in the Advanced Options section:
+   - Proxy URL field
+   - "Use Random Proxy for YouTube" checkbox
+3. Test downloading a YouTube video with the random proxy option enabled
+4. Verify that the download log shows a proxy being used
+
+You can also verify the previous OAuth token functionality:
+
+1. Check that the OAuth token fields are visible in the web interface
+2. Test downloading content that requires OAuth authentication
 
 ## Troubleshooting
 

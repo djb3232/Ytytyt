@@ -372,5 +372,8 @@ if __name__ == '__main__':
     # Get port from environment or use default
     port = int(os.environ.get('PORT', 12000))
     
-    # Run app in development mode
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # Determine if we're running in production or development
+    is_production = os.environ.get('RENDER', False) or os.environ.get('PRODUCTION', False)
+    
+    # Run app
+    app.run(host='0.0.0.0', port=port, debug=not is_production)

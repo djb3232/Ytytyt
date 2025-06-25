@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Multi-Format Video and Audio Downloader{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Download Video or Audio</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('download') }}">
+                    {{ form.csrf_token }}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.url.id }}" class="form-label">Video URL</label>
+                        {{ form.url(class="form-control", placeholder="https://www.youtube.com/watch?v=...") }}
+                        {% if form.url.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.url.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.format.id }}" class="form-label">Format</label>
+                            {{ form.format(class="form-select") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.quality.id }}" class="form-label">Quality</label>
+                            {{ form.quality(class="form-select") }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.audio_only(class="form-check-input") }}
+                                <label class="form-check-label" for="{{ form.audio_only.id }}">
+                                    Audio Only
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.playlist(class="form-check-input") }}
+                                <label class="form-check-label" for="{{ form.playlist.id }}">
+                                    Download Playlist
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.subtitles.id }}" class="form-label">Subtitles (optional)</label>
+                        {{ form.subtitles(class="form-control", placeholder="en,fr,es") }}
+                        <div class="form-text">Comma separated language codes (e.g., en,fr,es)</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Active Downloads -->
+        {% if active_downloads %}
+            <div class="card mt-4 shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="card-title mb-0">Active Downloads</h4>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for download_id, download in active_downloads.items() %}
+                            <a href="{{ url_for('download_status', download_id=download_id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Download #{{ download_id[:8] }}</h5>
+                                    <small>{{ download.start_time }}</small>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" 
+                                         style="width: {{ download.progress }}%">
+                                        {{ download.progress }}%
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Completed Downloads -->
+        {% if completed_downloads %}
+            <div class="card mt-4 shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="card-title mb-0">Completed Downloads</h4>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for download_id, download in completed_downloads.items() %}
+                            <a href="{{ url_for('download_status', download_id=download_id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Download #{{ download_id[:8] }}</h5>
+                                    <small>{{ download.end_time }}</small>
+                                </div>
+                                <p class="mb-1">
+                                    Status: 
+                                    {% if download.status == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Failed</span>
+                                    {% endif %}
+                                </p>
+                                <small>Files: {{ download.files|length }}</small>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

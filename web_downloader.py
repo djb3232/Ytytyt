@@ -308,17 +308,17 @@ def cleanup_old_downloads():
         # Sleep for 1 hour
         time.sleep(60 * 60)
 
+# Check dependencies
+check_dependencies()
+
+# Start cleanup thread
+cleanup_thread = threading.Thread(target=cleanup_old_downloads)
+cleanup_thread.daemon = True
+cleanup_thread.start()
+
 if __name__ == '__main__':
-    # Check dependencies
-    check_dependencies()
-    
-    # Start cleanup thread
-    cleanup_thread = threading.Thread(target=cleanup_old_downloads)
-    cleanup_thread.daemon = True
-    cleanup_thread.start()
-    
     # Get port from environment or use default
     port = int(os.environ.get('PORT', 12000))
     
-    # Run app
+    # Run app in development mode
     app.run(host='0.0.0.0', port=port, debug=True)

@@ -22,6 +22,14 @@ Available in three versions:
 - Display video information
 - Control download rate
 - Proxy support
+- **Cookie bypass for restricted sites**:
+  - Use cookies from browser (Chrome, Firefox, Safari, Edge, Opera)
+  - Paste cookies in Netscape format
+  - Extract cookies from browsers using the included utility
+- **Advanced HTTP options**:
+  - Custom User-Agent
+  - Custom Referer
+  - Custom HTTP headers
 
 ## Requirements
 
@@ -66,6 +74,11 @@ python multi_downloader.py [options] URL [URL...]
 - `--proxy URL`: Use the specified HTTP/HTTPS/SOCKS proxy
 - `--limit-rate RATE`: Maximum download rate (e.g. 50K, 4.2M)
 - `--no-mtime`: Don't use the Last-modified header to set the file modification time
+- `--cookies FILE`: Path to cookies file (Netscape or browser cookies.txt format)
+- `--browser-cookies BROWSER`: Extract cookies from browser (chrome, firefox, safari, edge, opera)
+- `--user-agent AGENT`: Specify a custom user agent
+- `--referer URL`: Specify a custom referer, useful for bypassing some restrictions
+- `--headers JSON`: Specify custom HTTP headers as a JSON string
 
 ## Examples
 
@@ -113,6 +126,40 @@ python multi_downloader.py -f mp4 -q 1080 -s en -o "%(title)s-%(resolution)s.%(e
 ```
 
 This will download a 1080p MP4 video with English subtitles and name the file using the video title and resolution.
+
+### Bypassing Website Restrictions
+
+Some websites require cookies or specific headers to download videos. Here's how to bypass these restrictions:
+
+1. Using cookies from a browser:
+   ```
+   python multi_downloader.py --browser-cookies chrome https://www.example.com/restricted-video
+   ```
+
+2. Using a cookies file:
+   ```
+   python multi_downloader.py --cookies cookies.txt https://www.example.com/restricted-video
+   ```
+
+3. Using custom user agent and referer:
+   ```
+   python multi_downloader.py --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" --referer "https://www.example.com" https://www.example.com/restricted-video
+   ```
+
+4. Using custom HTTP headers:
+   ```
+   python multi_downloader.py --headers '{"X-Requested-With": "XMLHttpRequest", "Origin": "https://www.example.com"}' https://www.example.com/restricted-video
+   ```
+
+### Extracting Cookies
+
+You can use the included `extract_cookies.py` script to extract cookies from browsers:
+
+```
+python extract_cookies.py chrome -d example.com -o cookies.txt
+```
+
+This will extract cookies from Chrome for the domain example.com and save them to cookies.txt.
 
 ## Supported Sites
 

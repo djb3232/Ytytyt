@@ -21,6 +21,11 @@ Options:
     --proxy URL                     Use the specified HTTP/HTTPS/SOCKS proxy
     --limit-rate RATE               Maximum download rate (e.g. 50K, 4.2M)
     --no-mtime                      Don't use the Last-modified header to set the file modification time
+    --cookies FILE                  Path to cookies file (Netscape or browser cookies.txt format)
+    --browser-cookies BROWSER       Extract cookies from browser (chrome, firefox, safari, edge, opera)
+    --user-agent AGENT              Specify a custom user agent
+    --referer URL                   Specify a custom referer, useful for bypassing some restrictions
+    --headers JSON                  Specify custom HTTP headers as a JSON string
 """
 
 import argparse
@@ -78,6 +83,21 @@ def parse_arguments():
     
     parser.add_argument('--no-mtime', action='store_true',
                         help='Don\'t use the Last-modified header to set the file modification time')
+    
+    parser.add_argument('--cookies', 
+                        help='Path to cookies file (Netscape or browser cookies.txt format)')
+    
+    parser.add_argument('--browser-cookies', choices=['chrome', 'firefox', 'safari', 'edge', 'opera'],
+                        help='Extract cookies from browser (chrome, firefox, safari, edge, opera)')
+    
+    parser.add_argument('--user-agent',
+                        help='Specify a custom user agent')
+    
+    parser.add_argument('--referer',
+                        help='Specify a custom referer, useful for bypassing some restrictions')
+    
+    parser.add_argument('--headers',
+                        help='Specify custom HTTP headers as a JSON string')
     
     return parser.parse_args()
 
@@ -140,6 +160,26 @@ def build_command(args):
     # Handle mtime
     if args.no_mtime:
         cmd.append('--no-mtime')
+    
+    # Handle cookies
+    if args.cookies:
+        cmd.extend(['--cookies', args.cookies])
+    
+    # Handle browser cookies
+    if args.browser_cookies:
+        cmd.extend(['--cookies-from-browser', args.browser_cookies])
+    
+    # Handle user agent
+    if args.user_agent:
+        cmd.extend(['--user-agent', args.user_agent])
+    
+    # Handle referer
+    if args.referer:
+        cmd.extend(['--referer', args.referer])
+    
+    # Handle custom headers
+    if args.headers:
+        cmd.extend(['--add-headers', args.headers])
     
     # Add URLs
     cmd.extend(args.urls)

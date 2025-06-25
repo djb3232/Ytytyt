@@ -61,6 +61,55 @@
                         <div class="form-text">Comma separated language codes (e.g., en,fr,es)</div>
                     </div>
                     
+                    <!-- Cookie Options -->
+                    <div class="mb-3">
+                        <button class="btn btn-outline-secondary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#cookieOptions">
+                            Cookie Options (for restricted sites)
+                        </button>
+                        <div class="collapse" id="cookieOptions">
+                            <div class="card card-body bg-light">
+                                <div class="mb-3">
+                                    <label for="{{ form.cookies.id }}" class="form-label">Cookies (Netscape format)</label>
+                                    {{ form.cookies(class="form-control", rows="3", placeholder="# Netscape HTTP Cookie File...") }}
+                                    <div class="form-text">Paste cookies in Netscape format to bypass restrictions</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.browser_cookies.id }}" class="form-label">Extract cookies from browser</label>
+                                    {{ form.browser_cookies(class="form-select") }}
+                                    <div class="form-text">Extract cookies from your browser (requires browser to be installed on server)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Options -->
+                    <div class="mb-3">
+                        <button class="btn btn-outline-secondary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#advancedOptions">
+                            Advanced Options
+                        </button>
+                        <div class="collapse" id="advancedOptions">
+                            <div class="card card-body bg-light">
+                                <div class="mb-3">
+                                    <label for="{{ form.user_agent.id }}" class="form-label">User Agent</label>
+                                    {{ form.user_agent(class="form-control", placeholder="Mozilla/5.0 (Windows NT 10.0; Win64; x64)...") }}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.referer.id }}" class="form-label">Referer URL</label>
+                                    {{ form.referer(class="form-control", placeholder="https://example.com") }}
+                                    <div class="form-text">Some sites check the referer header</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.custom_headers.id }}" class="form-label">Custom Headers (JSON format)</label>
+                                    {{ form.custom_headers(class="form-control", rows="3", placeholder='{"X-Requested-With": "XMLHttpRequest"}') }}
+                                    <div class="form-text">Add custom HTTP headers in JSON format</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="d-grid">
                         {{ form.submit(class="btn btn-primary btn-lg") }}
                     </div>

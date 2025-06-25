@@ -73,6 +73,23 @@ class DownloadForm(FlaskForm):
     audio_only = BooleanField('Audio Only')
     playlist = BooleanField('Download Playlist')
     subtitles = StringField('Subtitles (comma separated language codes, e.g., en,fr)', validators=[Optional()])
+    
+    # Cookie and browser options
+    cookies = StringField('Cookies (paste cookies in Netscape format)', validators=[Optional()])
+    browser_cookies = SelectField('Extract cookies from browser', choices=[
+        ('none', 'None'),
+        ('chrome', 'Chrome'),
+        ('firefox', 'Firefox'),
+        ('safari', 'Safari'),
+        ('edge', 'Edge'),
+        ('opera', 'Opera')
+    ], default='none')
+    
+    # Advanced options
+    user_agent = StringField('User Agent', validators=[Optional()])
+    referer = StringField('Referer URL', validators=[Optional()])
+    custom_headers = TextAreaField('Custom Headers (JSON format)', validators=[Optional()])
+    
     submit = SubmitField('Download')
 
 # Function to build yt-dlp command
@@ -110,6 +127,41 @@ def build_command(form_data, download_id):
     subtitles = form_data.get('subtitles', '').strip()
     if subtitles:
         cmd.extend(['--write-sub', '--sub-langs', subtitles])
+    
+    # Handle cookies
+    cookies = form_data.get('cookies', '').strip()
+    if cookies:
+        # Create a cookies file
+        cookies_file = os.path.join(output_dir, 'cookies.txt')
+        with open(cookies_file, 'w') as f:
+            f.write(cookies)
+        cmd.extend(['--cookies', cookies_file])
+    
+    # Handle browser cookies
+    browser_cookies = form_data.get('browser_cookies')
+    if browser_cookies and browser_cookies != 'none':
+        cmd.extend(['--cookies-from-browser', browser_cookies])
+    
+    # Handle user agent
+    user_agent = form_data.get('user_agent', '').strip()
+    if user_agent:
+        cmd.extend(['--user-agent', user_agent])
+    
+    # Handle referer
+    referer = form_data.get('referer', '').strip()
+    if referer:
+        cmd.extend(['--referer', referer])
+    
+    # Handle custom headers
+    custom_headers = form_data.get('custom_headers', '').strip()
+    if custom_headers:
+        try:
+            # Validate JSON format
+            json.loads(custom_headers)
+            cmd.extend(['--add-headers', custom_headers])
+        except json.JSONDecodeError:
+            # If not valid JSON, ignore
+            pass
     
     # Add URL
     cmd.append(form_data.get('url'))

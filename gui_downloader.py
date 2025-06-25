@@ -108,6 +108,65 @@ class DownloaderGUI:
         self.rate_entry.grid(row=0, column=1, padx=5, sticky=tk.EW)
         rate_frame.columnconfigure(1, weight=1)
         
+        # Cookie options
+        cookie_frame = ttk.LabelFrame(advanced_frame, text="Cookie Options (for restricted sites)")
+        cookie_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Cookies file
+        cookies_file_frame = ttk.Frame(cookie_frame)
+        cookies_file_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(cookies_file_frame, text="Cookies File:").grid(row=0, column=0, sticky=tk.W)
+        self.cookies_file_var = tk.StringVar()
+        self.cookies_file_entry = ttk.Entry(cookies_file_frame, textvariable=self.cookies_file_var)
+        self.cookies_file_entry.grid(row=0, column=1, padx=5, sticky=tk.EW)
+        ttk.Button(cookies_file_frame, text="Browse", command=self.browse_cookies_file).grid(row=0, column=2, padx=5)
+        cookies_file_frame.columnconfigure(1, weight=1)
+        
+        # Browser cookies
+        browser_cookies_frame = ttk.Frame(cookie_frame)
+        browser_cookies_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(browser_cookies_frame, text="Extract cookies from browser:").grid(row=0, column=0, sticky=tk.W)
+        self.browser_cookies_var = tk.StringVar(value="none")
+        browser_options = ["none", "chrome", "firefox", "safari", "edge", "opera"]
+        self.browser_cookies_combo = ttk.Combobox(browser_cookies_frame, textvariable=self.browser_cookies_var, values=browser_options, width=10)
+        self.browser_cookies_combo.grid(row=0, column=1, padx=5, sticky=tk.W)
+        
+        # HTTP headers
+        headers_frame = ttk.LabelFrame(advanced_frame, text="HTTP Headers")
+        headers_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # User agent
+        user_agent_frame = ttk.Frame(headers_frame)
+        user_agent_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(user_agent_frame, text="User Agent:").grid(row=0, column=0, sticky=tk.W)
+        self.user_agent_var = tk.StringVar()
+        self.user_agent_entry = ttk.Entry(user_agent_frame, textvariable=self.user_agent_var)
+        self.user_agent_entry.grid(row=0, column=1, padx=5, sticky=tk.EW)
+        user_agent_frame.columnconfigure(1, weight=1)
+        
+        # Referer
+        referer_frame = ttk.Frame(headers_frame)
+        referer_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(referer_frame, text="Referer URL:").grid(row=0, column=0, sticky=tk.W)
+        self.referer_var = tk.StringVar()
+        self.referer_entry = ttk.Entry(referer_frame, textvariable=self.referer_var)
+        self.referer_entry.grid(row=0, column=1, padx=5, sticky=tk.EW)
+        referer_frame.columnconfigure(1, weight=1)
+        
+        # Custom headers
+        custom_headers_frame = ttk.Frame(headers_frame)
+        custom_headers_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(custom_headers_frame, text="Custom Headers (JSON):").grid(row=0, column=0, sticky=tk.W)
+        self.custom_headers_var = tk.StringVar()
+        self.custom_headers_entry = ttk.Entry(custom_headers_frame, textvariable=self.custom_headers_var)
+        self.custom_headers_entry.grid(row=0, column=1, padx=5, sticky=tk.EW)
+        custom_headers_frame.columnconfigure(1, weight=1)
+        
         # Additional options
         options_frame2 = ttk.Frame(advanced_frame)
         options_frame2.pack(fill=tk.X, padx=10, pady=5)
@@ -168,6 +227,15 @@ class DownloaderGUI:
         directory = filedialog.askdirectory(initialdir=self.output_dir_var.get())
         if directory:
             self.output_dir_var.set(directory)
+    
+    def browse_cookies_file(self):
+        """Open a file browser dialog for cookies file."""
+        file_path = filedialog.askopenfilename(
+            title="Select Cookies File",
+            filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
+        )
+        if file_path:
+            self.cookies_file_var.set(file_path)
     
     def get_urls(self):
         """Get URLs from the text box."""
@@ -238,6 +306,38 @@ class DownloaderGUI:
         # Handle mtime
         if self.no_mtime_var.get():
             cmd.append('--no-mtime')
+        
+        # Handle cookies file
+        cookies_file = self.cookies_file_var.get().strip()
+        if cookies_file:
+            cmd.extend(['--cookies', cookies_file])
+        
+        # Handle browser cookies
+        browser_cookies = self.browser_cookies_var.get()
+        if browser_cookies and browser_cookies != 'none':
+            cmd.extend(['--cookies-from-browser', browser_cookies])
+        
+        # Handle user agent
+        user_agent = self.user_agent_var.get().strip()
+        if user_agent:
+            cmd.extend(['--user-agent', user_agent])
+        
+        # Handle referer
+        referer = self.referer_var.get().strip()
+        if referer:
+            cmd.extend(['--referer', referer])
+        
+        # Handle custom headers
+        custom_headers = self.custom_headers_var.get().strip()
+        if custom_headers:
+            try:
+                # Validate JSON format
+                import json
+                json.loads(custom_headers)
+                cmd.extend(['--add-headers', custom_headers])
+            except (json.JSONDecodeError, ImportError):
+                # If not valid JSON or json module not available, ignore
+                self.update_console("Warning: Invalid JSON format for custom headers. Ignoring.")
         
         # Add URLs
         cmd.extend(urls)

@@ -23,7 +23,11 @@ Available in three versions:
 - Control download rate
 - **Proxy support**:
   - Manual proxy configuration
-  - **Random proxy selection for YouTube** (automatically selects a working proxy)
+  - **Smart proxy selection for YouTube**:
+    - Automatically finds the best proxy based on response time
+    - Falls back to random proxy selection if needed
+    - Maintains a list of working proxies
+    - Supports HTTP, HTTPS, and SOCKS5 proxies
 - **Cookie bypass for restricted sites**:
   - Use cookies from browser (Chrome, Firefox, Safari, Edge, Opera)
   - Paste cookies in Netscape format
@@ -78,7 +82,7 @@ python multi_downloader.py [options] URL [URL...]
 - `-l, --list-formats`: List available formats instead of downloading
 - `-i, --info`: Display video info instead of downloading
 - `--proxy URL`: Use the specified HTTP/HTTPS/SOCKS proxy
-- `--random-proxy`: Use a random proxy for YouTube downloads
+- `--random-proxy`: Use the best available proxy for YouTube downloads (automatically selects based on response time)
 - `--limit-rate RATE`: Maximum download rate (e.g. 50K, 4.2M)
 - `--no-mtime`: Don't use the Last-modified header to set the file modification time
 - `--cookies FILE`: Path to cookies file (Netscape or browser cookies.txt format)
@@ -126,9 +130,14 @@ python multi_downloader.py [options] URL [URL...]
    python multi_downloader.py --limit-rate 500K https://www.youtube.com/watch?v=dQw4w9WgXcQ
    ```
 
-8. Use a random proxy for YouTube downloads:
+8. Use the best available proxy for YouTube downloads:
    ```
    python multi_downloader.py --random-proxy https://www.youtube.com/watch?v=dQw4w9WgXcQ
+   ```
+
+9. Use a specific proxy:
+   ```
+   python multi_downloader.py --proxy socks5://72.221.232.155:4145 https://www.youtube.com/watch?v=dQw4w9WgXcQ
    ```
 
 ## Advanced Usage

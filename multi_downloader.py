@@ -40,7 +40,7 @@ import logging
 
 # Import proxy management module
 try:
-    from proxies import get_random_proxy, is_youtube_url
+    from proxies import get_random_proxy, get_best_proxy, is_youtube_url
     PROXY_SUPPORT = True
 except ImportError:
     PROXY_SUPPORT = False
@@ -178,11 +178,19 @@ def build_command(args):
         # Check if any URL is from YouTube
         youtube_urls = [url for url in args.urls if is_youtube_url(url)]
         if youtube_urls:
-            # Get a random proxy for YouTube URLs
-            random_proxy = get_random_proxy(youtube_urls[0])
-            if random_proxy:
-                print(f"Using random proxy: {random_proxy}")
-                cmd.extend(['--proxy', random_proxy])
+            # Try to get the best proxy for the first YouTube URL
+            print(f"Finding the best proxy for {youtube_urls[0]}...")
+            best_proxy = get_best_proxy(youtube_urls[0])
+            
+            if best_proxy:
+                print(f"Using best proxy: {best_proxy}")
+                cmd.extend(['--proxy', best_proxy])
+            else:
+                # Fallback to random proxy if best proxy selection fails
+                random_proxy = get_random_proxy(youtube_urls[0])
+                if random_proxy:
+                    print(f"Using random proxy: {random_proxy}")
+                    cmd.extend(['--proxy', random_proxy])
     
     # Handle rate limit
     if args.limit_rate:

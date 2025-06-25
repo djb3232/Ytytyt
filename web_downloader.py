@@ -25,7 +25,7 @@ from wtforms.validators import DataRequired, URL, Optional
 
 # Import proxy management module
 try:
-    from proxies import get_random_proxy, is_youtube_url
+    from proxies import get_random_proxy, get_best_proxy, is_youtube_url
     PROXY_SUPPORT = True
 except ImportError:
     PROXY_SUPPORT = False
@@ -182,11 +182,19 @@ def build_command(form_data, download_id):
         # Check if URL is from YouTube
         url = form_data.get('url', '')
         if is_youtube_url(url):
-            # Get a random proxy for YouTube URL
-            random_proxy = get_random_proxy(url)
-            if random_proxy:
-                print(f"Using random proxy: {random_proxy}")
-                cmd.extend(['--proxy', random_proxy])
+            # Try to get the best proxy for the YouTube URL
+            print(f"Finding the best proxy for {url}...")
+            best_proxy = get_best_proxy(url)
+            
+            if best_proxy:
+                print(f"Using best proxy: {best_proxy}")
+                cmd.extend(['--proxy', best_proxy])
+            else:
+                # Fallback to random proxy if best proxy selection fails
+                random_proxy = get_random_proxy(url)
+                if random_proxy:
+                    print(f"Using random proxy: {random_proxy}")
+                    cmd.extend(['--proxy', random_proxy])
     
     # Handle custom headers and OAuth token
     custom_headers = form_data.get('custom_headers', '').strip()

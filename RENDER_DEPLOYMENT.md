@@ -5,9 +5,22 @@ This guide will help you deploy the Multi-Format Video and Audio Downloader to R
 ## Prerequisites
 
 1. A [Render.com](https://render.com/) account
-2. Your code pushed to a GitHub repository
+2. Your code pushed to a GitHub repository (if not using one-click deployment)
 
-## Deployment Steps
+## Deployment Options
+
+### Option 1: One-Click Deployment (Recommended)
+
+1. Click the "Deploy to Render" button in the README.md file:
+
+   [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/djb3232/Ytytyt)
+
+2. Log in to your Render.com account if prompted
+3. Review the settings and click "Apply"
+4. Wait for the deployment to complete (this may take a few minutes)
+5. Access your application at the URL provided by Render.com
+
+### Option 2: Manual Deployment via Render Dashboard
 
 1. **Sign up for Render.com**
    - Go to [Render.com](https://render.com/) and sign up for an account
@@ -80,6 +93,28 @@ This guide will help you deploy the Multi-Format Video and Audio Downloader to R
    - Use background tasks for long-running operations
    - Implement caching where appropriate
 
+### Option 3: Deployment via CLI
+
+If you prefer using the command line:
+
+1. Install the Render CLI:
+   ```
+   npm install -g @render/cli
+   ```
+
+2. Log in to your Render account:
+   ```
+   render login
+   ```
+
+3. Run the deployment script:
+   ```
+   ./deploy_to_render.sh
+   ```
+
+4. Wait for the deployment to complete (this may take a few minutes)
+5. Access your application at the URL provided by Render.com
+
 ## Updating Your Application
 
 To update your application:
@@ -87,6 +122,7 @@ To update your application:
 1. Push changes to your GitHub repository
 2. If auto-deploy is enabled, Render will automatically deploy the changes
 3. If auto-deploy is disabled, manually deploy from the Render dashboard
+4. If using the CLI, run `./deploy_to_render.sh` again
 
 ## Conclusion
 

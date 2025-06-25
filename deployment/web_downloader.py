@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import threading
 import time
+import logging
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, session, g
@@ -21,6 +22,14 @@ from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from wtforms import StringField, SelectField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, URL, Optional
+
+# Import proxy management module
+try:
+    from proxies import get_random_proxy, get_best_proxy, is_youtube_url
+    PROXY_SUPPORT = True
+except ImportError:
+    PROXY_SUPPORT = False
+    logging.warning("Proxy module not found. Random proxy feature will be disabled.")
 
 # Create Flask app
 app = Flask(__name__)
@@ -73,6 +82,34 @@ class DownloadForm(FlaskForm):
     audio_only = BooleanField('Audio Only')
     playlist = BooleanField('Download Playlist')
     subtitles = StringField('Subtitles (comma separated language codes, e.g., en,fr)', validators=[Optional()])
+    
+    # Cookie and browser options
+    cookies = StringField('Cookies (paste cookies in Netscape format)', validators=[Optional()])
+    browser_cookies = SelectField('Extract cookies from browser', choices=[
+        ('none', 'None'),
+        ('chrome', 'Chrome'),
+        ('firefox', 'Firefox'),
+        ('safari', 'Safari'),
+        ('edge', 'Edge'),
+        ('opera', 'Opera')
+    ], default='none')
+    
+    # Advanced options
+    user_agent = StringField('User Agent', validators=[Optional()])
+    referer = StringField('Referer URL', validators=[Optional()])
+    custom_headers = TextAreaField('Custom Headers (JSON format)', validators=[Optional()])
+    proxy = StringField('Proxy URL (HTTP/HTTPS/SOCKS)', validators=[Optional()])
+    use_random_proxy = BooleanField('Use Random Proxy for YouTube')
+    
+    # OAuth options
+    auth_token = StringField('OAuth Token', validators=[Optional()])
+    auth_token_type = SelectField('OAuth Token Type', choices=[
+        ('Bearer', 'Bearer'),
+        ('Basic', 'Basic'),
+        ('Digest', 'Digest'),
+        ('OAuth', 'OAuth')
+    ], default='Bearer')
+    
     submit = SubmitField('Download')
 
 # Function to build yt-dlp command
@@ -110,6 +147,88 @@ def build_command(form_data, download_id):
     subtitles = form_data.get('subtitles', '').strip()
     if subtitles:
         cmd.extend(['--write-sub', '--sub-langs', subtitles])
+    
+    # Handle cookies
+    cookies = form_data.get('cookies', '').strip()
+    if cookies:
+        # Create a cookies file
+        cookies_file = os.path.join(output_dir, 'cookies.txt')
+        with open(cookies_file, 'w') as f:
+            f.write(cookies)
+        cmd.extend(['--cookies', cookies_file])
+    
+    # Handle browser cookies
+    browser_cookies = form_data.get('browser_cookies')
+    if browser_cookies and browser_cookies != 'none':
+        cmd.extend(['--cookies-from-browser', browser_cookies])
+    
+    # Handle user agent
+    user_agent = form_data.get('user_agent', '').strip()
+    if user_agent:
+        cmd.extend(['--user-agent', user_agent])
+    
+    # Handle referer
+    referer = form_data.get('referer', '').strip()
+    if referer:
+        cmd.extend(['--referer', referer])
+    
+    # Handle proxy
+    proxy = form_data.get('proxy', '').strip()
+    use_random_proxy = form_data.get('use_random_proxy', False)
+    
+    if proxy:
+        cmd.extend(['--proxy', proxy])
+    elif use_random_proxy and PROXY_SUPPORT:
+        # Check if URL is from YouTube
+        url = form_data.get('url', '')
+        if is_youtube_url(url):
+            # Try to get the best proxy for the YouTube URL
+            print(f"Finding the best proxy for {url}...")
+            best_proxy = get_best_proxy(url)
+            
+            if best_proxy:
+                print(f"Using best proxy: {best_proxy}")
+                cmd.extend(['--proxy', best_proxy])
+            else:
+                # Fallback to random proxy if best proxy selection fails
+                random_proxy = get_random_proxy(url)
+                if random_proxy:
+                    print(f"Using random proxy: {random_proxy}")
+                    cmd.extend(['--proxy', random_proxy])
+    
+    # Handle custom headers and OAuth token
+    custom_headers = form_data.get('custom_headers', '').strip()
+    auth_token = form_data.get('auth_token', '').strip()
+    auth_token_type = form_data.get('auth_token_type', 'Bearer')
+    
+    if auth_token:
+        # Create Authorization header with the token
+        auth_header = f'Authorization: {auth_token_type} {auth_token}'
+        
+        if custom_headers:
+            try:
+                # Parse existing headers
+                headers_dict = json.loads(custom_headers)
+                # Add Authorization header
+                headers_dict['Authorization'] = f'{auth_token_type} {auth_token}'
+                # Convert back to JSON
+                cmd.extend(['--add-headers', json.dumps(headers_dict)])
+            except json.JSONDecodeError:
+                # If not valid JSON, create a new headers dict
+                headers_dict = {'Authorization': f'{auth_token_type} {auth_token}'}
+                cmd.extend(['--add-headers', json.dumps(headers_dict)])
+        else:
+            # No existing headers, just add the Authorization header
+            headers_dict = {'Authorization': f'{auth_token_type} {auth_token}'}
+            cmd.extend(['--add-headers', json.dumps(headers_dict)])
+    elif custom_headers:
+        try:
+            # Validate JSON format
+            json.loads(custom_headers)
+            cmd.extend(['--add-headers', custom_headers])
+        except json.JSONDecodeError:
+            # If not valid JSON, ignore
+            pass
     
     # Add URL
     cmd.append(form_data.get('url'))
@@ -218,7 +337,14 @@ def download():
             'quality': form.quality.data,
             'audio_only': form.audio_only.data,
             'playlist': form.playlist.data,
-            'subtitles': form.subtitles.data
+            'subtitles': form.subtitles.data,
+            'cookies': form.cookies.data,
+            'browser_cookies': form.browser_cookies.data,
+            'user_agent': form.user_agent.data,
+            'referer': form.referer.data,
+            'custom_headers': form.custom_headers.data,
+            'auth_token': form.auth_token.data,
+            'auth_token_type': form.auth_token_type.data
         }
         
         cmd, output_dir = build_command(form_data, download_id)
@@ -308,17 +434,29 @@ def cleanup_old_downloads():
         # Sleep for 1 hour
         time.sleep(60 * 60)
 
+# Check dependencies
+check_dependencies()
+
+# Start cleanup thread
+cleanup_thread = threading.Thread(target=cleanup_old_downloads)
+cleanup_thread.daemon = True
+cleanup_thread.start()
+
 if __name__ == '__main__':
-    # Check dependencies
-    check_dependencies()
+    import argparse
     
-    # Start cleanup thread
-    cleanup_thread = threading.Thread(target=cleanup_old_downloads)
-    cleanup_thread.daemon = True
-    cleanup_thread.start()
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Web Multi-Format Video and Audio Downloader')
+    parser.add_argument('--port', type=int, default=int(os.environ.get('PORT', 12000)),
+                        help='Port to run the server on')
+    parser.add_argument('--host', type=str, default='0.0.0.0',
+                        help='Host to run the server on')
+    parser.add_argument('--debug', action='store_true',
+                        help='Run in debug mode')
+    args = parser.parse_args()
     
-    # Get port from environment or use default
-    port = int(os.environ.get('PORT', 12000))
+    # Determine if we're running in production or development
+    is_production = os.environ.get('RENDER', False) or os.environ.get('PRODUCTION', False)
     
     # Run app
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host=args.host, port=args.port, debug=args.debug or not is_production)

@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "10000:10000"
+    volumes:
+      - ./downloads:/app/downloads
+    environment:
+      - PORT=10000
+      - SECRET_KEY=your-secret-key-change-in-production

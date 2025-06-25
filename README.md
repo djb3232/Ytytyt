@@ -7,6 +7,10 @@ Available in three versions:
 2. **Desktop GUI** - For desktop users
 3. **Web interface** - For browser access and remote usage
 
+![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Python](https://img.shields.io/badge/python-3.6%2B-blue.svg)
+
 ## Features
 
 - Download videos in various formats (mp4, webm, etc.)
@@ -17,7 +21,25 @@ Available in three versions:
 - List available formats for a video
 - Display video information
 - Control download rate
-- Proxy support
+- **Proxy support**:
+  - Manual proxy configuration
+  - **Smart proxy selection for YouTube**:
+    - Automatically finds the best proxy based on response time
+    - Falls back to random proxy selection if needed
+    - Maintains a list of working proxies
+    - Supports HTTP, HTTPS, and SOCKS5 proxies
+- **Cookie bypass for restricted sites**:
+  - Use cookies from browser (Chrome, Firefox, Safari, Edge, Opera)
+  - Paste cookies in Netscape format
+  - Extract cookies from browsers using the included utility
+- **OAuth token authentication**:
+  - Support for Bearer, Basic, Digest, and OAuth token types
+  - Automatically adds Authorization header
+  - Works with sites requiring OAuth authentication
+- **Advanced HTTP options**:
+  - Custom User-Agent
+  - Custom Referer
+  - Custom HTTP headers
 
 ## Requirements
 
@@ -60,8 +82,16 @@ python multi_downloader.py [options] URL [URL...]
 - `-l, --list-formats`: List available formats instead of downloading
 - `-i, --info`: Display video info instead of downloading
 - `--proxy URL`: Use the specified HTTP/HTTPS/SOCKS proxy
+- `--random-proxy`: Use the best available proxy for YouTube downloads (automatically selects based on response time)
 - `--limit-rate RATE`: Maximum download rate (e.g. 50K, 4.2M)
 - `--no-mtime`: Don't use the Last-modified header to set the file modification time
+- `--cookies FILE`: Path to cookies file (Netscape or browser cookies.txt format)
+- `--browser-cookies BROWSER`: Extract cookies from browser (chrome, firefox, safari, edge, opera)
+- `--user-agent AGENT`: Specify a custom user agent
+- `--referer URL`: Specify a custom referer, useful for bypassing some restrictions
+- `--headers JSON`: Specify custom HTTP headers as a JSON string
+- `--auth-token TOKEN`: OAuth token for sites requiring authentication
+- `--auth-token-type TYPE`: OAuth token type (Bearer, Basic, Digest, OAuth), default is Bearer
 
 ## Examples
 
@@ -100,6 +130,16 @@ python multi_downloader.py [options] URL [URL...]
    python multi_downloader.py --limit-rate 500K https://www.youtube.com/watch?v=dQw4w9WgXcQ
    ```
 
+8. Use the best available proxy for YouTube downloads:
+   ```
+   python multi_downloader.py --random-proxy https://www.youtube.com/watch?v=dQw4w9WgXcQ
+   ```
+
+9. Use a specific proxy:
+   ```
+   python multi_downloader.py --proxy socks5://72.221.232.155:4145 https://www.youtube.com/watch?v=dQw4w9WgXcQ
+   ```
+
 ## Advanced Usage
 
 You can combine multiple options for more specific downloads:
@@ -109,6 +149,50 @@ python multi_downloader.py -f mp4 -q 1080 -s en -o "%(title)s-%(resolution)s.%(e
 ```
 
 This will download a 1080p MP4 video with English subtitles and name the file using the video title and resolution.
+
+### Bypassing Website Restrictions
+
+Some websites require cookies or specific headers to download videos. Here's how to bypass these restrictions:
+
+1. Using cookies from a browser:
+   ```
+   python multi_downloader.py --browser-cookies chrome https://www.example.com/restricted-video
+   ```
+
+2. Using a cookies file:
+   ```
+   python multi_downloader.py --cookies cookies.txt https://www.example.com/restricted-video
+   ```
+
+3. Using OAuth token authentication:
+   ```
+   python multi_downloader.py --auth-token "your_oauth_token_here" --auth-token-type "Bearer" https://api-protected-site.com/video
+   ```
+
+4. Using a random proxy for YouTube (helps bypass geo-restrictions):
+   ```
+   python multi_downloader.py --random-proxy https://www.youtube.com/watch?v=geo-restricted-video
+   ```
+
+5. Using custom user agent and referer:
+   ```
+   python multi_downloader.py --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" --referer "https://www.example.com" https://www.example.com/restricted-video
+   ```
+
+6. Using custom HTTP headers:
+   ```
+   python multi_downloader.py --headers '{"X-Requested-With": "XMLHttpRequest", "Origin": "https://www.example.com"}' https://www.example.com/restricted-video
+   ```
+
+### Extracting Cookies
+
+You can use the included `extract_cookies.py` script to extract cookies from browsers:
+
+```
+python extract_cookies.py chrome -d example.com -o cookies.txt
+```
+
+This will extract cookies from Chrome for the domain example.com and save them to cookies.txt.
 
 ## Supported Sites
 
@@ -121,6 +205,52 @@ This script supports all sites that yt-dlp supports, including:
 - Twitter
 - Instagram
 - SoundCloud
+
+## Deployment
+
+### Local Deployment
+
+To run the web interface locally:
+
+```
+./run_local.sh
+```
+
+This will start the web server on port 8080. You can access it at http://localhost:8080.
+
+### Render.com Deployment
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/djb3232/Ytytyt)
+
+To deploy to Render.com:
+
+1. Click the "Deploy to Render" button above, or
+2. Follow these steps manually:
+   - Fork this repository to your GitHub account
+   - Sign up for a Render.com account
+   - Connect your GitHub account to Render.com
+   - Create a new Web Service in Render.com
+   - Select your forked repository
+   - Use the following settings:
+     - Name: multi-format-downloader
+     - Environment: Python 3
+
+For detailed instructions, see [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md).
+
+#### Updating Your Render Deployment
+
+If you've already deployed the application and want to update to the latest version (1.1.0) with OAuth token support, see [UPDATE_RENDER.md](UPDATE_RENDER.md) for alternative update methods.
+     - Build Command: `pip install -r requirements.txt`
+     - Start Command: `gunicorn web_downloader:app`
+     - Add the following environment variables:
+       - `PORT`: 10000
+       - `SECRET_KEY`: (generate a random string)
+       - `RENDER`: true
+
+For detailed instructions, see [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md).
+
+## Supported Sites (continued)
+
 - And many more!
 
 For a complete list, check the [yt-dlp documentation](https://github.com/yt-dlp/yt-dlp#supported-sites).

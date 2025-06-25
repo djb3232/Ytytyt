@@ -5,7 +5,7 @@
 mkdir -p downloads
 
 # Set environment variables
-export PORT=12000
+export PORT=8080
 export SECRET_KEY="local-dev-key"
 
 # Run the application

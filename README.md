@@ -172,6 +172,42 @@ This script supports all sites that yt-dlp supports, including:
 - Twitter
 - Instagram
 - SoundCloud
+
+## Deployment
+
+### Local Deployment
+
+To run the web interface locally:
+
+```
+./run_local.sh
+```
+
+This will start the web server on port 8080. You can access it at http://localhost:8080.
+
+### Render.com Deployment
+
+To deploy to Render.com:
+
+1. Fork this repository to your GitHub account
+2. Sign up for a Render.com account
+3. Connect your GitHub account to Render.com
+4. Create a new Web Service in Render.com
+5. Select your forked repository
+6. Use the following settings:
+   - Name: multi-format-downloader
+   - Environment: Python 3
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `gunicorn web_downloader:app`
+   - Add the following environment variables:
+     - `PORT`: 10000
+     - `SECRET_KEY`: (generate a random string)
+     - `RENDER`: true
+
+For detailed instructions, see [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md).
+
+## Supported Sites (continued)
+
 - And many more!
 
 For a complete list, check the [yt-dlp documentation](https://github.com/yt-dlp/yt-dlp#supported-sites).
